@@ -161,9 +161,11 @@ def _remove_irrelevant_durations(
     items: "List[nodes.Item]", durations: "Dict[str, float]"
 ) -> "Dict[str, float]":
     # Filtering down durations to relevant ones ensures the avg isn't skewed by irrelevant data
-    test_ids = [item.nodeid for item in items]
-    durations = {name: durations[name] for name in test_ids if name in durations}
-    return durations
+    return {
+        item.nodeid: durations[item.nodeid]
+        for item in items
+        if item.nodeid in durations
+    }
 
 
 class Algorithms(enum.Enum):
