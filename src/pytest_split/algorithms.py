@@ -62,14 +62,11 @@ class LeastDurationAlgorithm(AlgorithmBase):
             (*tup, i) for i, tup in enumerate(items_with_durations)
         ]
 
-        # Sort by name to ensure it's always the same order
-        items_with_durations_indexed = sorted(
-            items_with_durations_indexed, key=lambda tup: str(tup[0])
-        )
-
-        # sort in ascending order
+        # Sort by duration descending, then by name ascending for deterministic tie-breaking
+        # Using a single sort with composite key instead of two separate sorts
         sorted_items_with_durations = sorted(
-            items_with_durations_indexed, key=lambda tup: tup[1], reverse=True
+            items_with_durations_indexed,
+            key=lambda tup: (-tup[1], str(tup[0])),
         )
 
         selected: List[List[Tuple[nodes.Item, int]]] = [[] for _ in range(splits)]
