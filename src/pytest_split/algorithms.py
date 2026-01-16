@@ -73,7 +73,6 @@ class LeastDurationAlgorithm(AlgorithmBase):
         )
 
         selected: List[List[Tuple[nodes.Item, int]]] = [[] for _ in range(splits)]
-        deselected: List[List[nodes.Item]] = [[] for _ in range(splits)]
         duration: List[float] = [0 for _ in range(splits)]
 
         # create a heap of the form (summed_durations, group_index)
@@ -87,9 +86,6 @@ class LeastDurationAlgorithm(AlgorithmBase):
             # store assignment
             selected[group_idx].append((item, original_index))
             duration[group_idx] = new_group_durations
-            for i in range(splits):
-                if i != group_idx:
-                    deselected[i].append(item)
 
             # store new duration - in case of ties it sorts by the group_idx
             heapq.heappush(heap, (new_group_durations, group_idx))
@@ -97,14 +93,12 @@ class LeastDurationAlgorithm(AlgorithmBase):
         groups = []
         for i in range(splits):
             # sort the items by their original index to maintain relative ordering
-            # we don't care about the order of deselected items
             s = [
                 item
                 for item, original_index in sorted(selected[i], key=lambda tup: tup[1])
             ]
-            group = TestGroup(
-                selected=s, deselected=deselected[i], duration=duration[i]
-            )
+            # deselected is computed lazily in plugin.py for the group being run
+            group = TestGroup(selected=s, deselected=[], duration=duration[i])
             groups.append(group)
         return groups
 
@@ -129,7 +123,6 @@ class DurationBasedChunksAlgorithm(AlgorithmBase):
         time_per_group = sum(map(itemgetter(1), items_with_durations)) / splits
 
         selected: List[List[nodes.Item]] = [[] for i in range(splits)]
-        deselected: List[List[nodes.Item]] = [[] for i in range(splits)]
         duration: List[float] = [0 for i in range(splits)]
 
         group_idx = 0
@@ -138,15 +131,11 @@ class DurationBasedChunksAlgorithm(AlgorithmBase):
                 group_idx += 1
 
             selected[group_idx].append(item)
-            for i in range(splits):
-                if i != group_idx:
-                    deselected[i].append(item)
             duration[group_idx] += item_duration
 
+        # deselected is computed lazily in plugin.py for the group being run
         return [
-            TestGroup(
-                selected=selected[i], deselected=deselected[i], duration=duration[i]
-            )
+            TestGroup(selected=selected[i], deselected=[], duration=duration[i])
             for i in range(splits)
         ]
 

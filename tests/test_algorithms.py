@@ -26,16 +26,14 @@ class TestAlgorithms:
         first, second, third = algo(splits=3, items=items, durations=durations)
 
         # each split should have one test
+        # Note: deselected is computed lazily in plugin.py, not in the algorithm
         assert first.selected == [item("a")]
-        assert first.deselected == [item("b"), item("c")]
         assert first.duration == 1
 
         assert second.selected == [item("b")]
-        assert second.deselected == [item("a"), item("c")]
         assert second.duration == 1
 
         assert third.selected == [item("c")]
-        assert third.deselected == [item("a"), item("b")]
         assert third.duration == 1
 
     @pytest.mark.parametrize("algo_name", Algorithms.names())

@@ -165,6 +165,11 @@ class PytestSplitPlugin(Base):
         groups = algo(splits, items, self.cached_durations)
         group = groups[group_idx - 1]
 
+        # Compute deselected lazily - only for the group we're running
+        # This is O(n) instead of O(n * splits) when done in the algorithm
+        selected_nodeids = {item.nodeid for item in group.selected}
+        group.deselected.extend(item for item in items if item.nodeid not in selected_nodeids)
+
         ensure_ipynb_compatibility(group, items)
 
         items[:] = group.selected

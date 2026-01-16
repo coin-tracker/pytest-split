@@ -7,6 +7,15 @@ from pytest_split.ipynb_compatibility import ensure_ipynb_compatibility
 item = namedtuple("item", "nodeid")  # noqa: PYI024
 
 
+def _compute_deselected(group, items):
+    """
+    Compute deselected items for a group (mirrors plugin.py behavior).
+    Algorithms return empty deselected lists for performance; this computes it lazily.
+    """
+    selected_nodeids = {i.nodeid for i in group.selected}
+    group.deselected.extend(i for i in items if i.nodeid not in selected_nodeids)
+
+
 class TestIPyNb:
     @pytest.mark.parametrize("algo_name", ["duration_based_chunks"])
     def test_ensure_ipynb_compatibility(self, algo_name):
@@ -53,6 +62,8 @@ class TestIPyNb:
             item(nodeid="temp/nbs/test_4.ipynb::Cell 2"),
         ]
 
+        # Compute deselected lazily (as plugin.py does) before ipynb compatibility check
+        _compute_deselected(groups[0], items)
         ensure_ipynb_compatibility(groups[0], items)
         assert groups[0].selected == [
             item(nodeid="temp/nbs/test_1.ipynb::Cell 0"),
@@ -64,6 +75,7 @@ class TestIPyNb:
             item(nodeid="temp/nbs/test_2.ipynb::Cell 3"),
         ]
 
+        _compute_deselected(groups[1], items)
         ensure_ipynb_compatibility(groups[1], items)
         assert groups[1].selected == [
             item(nodeid="temp/nbs/test_3.ipynb::Cell 0"),
@@ -73,6 +85,7 @@ class TestIPyNb:
             item(nodeid="temp/nbs/test_3.ipynb::Cell 4"),
         ]
 
+        _compute_deselected(groups[2], items)
         ensure_ipynb_compatibility(groups[2], items)
         assert groups[2].selected == [
             item(nodeid="temp/nbs/test_4.ipynb::Cell 0"),

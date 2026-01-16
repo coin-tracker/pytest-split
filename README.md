@@ -87,6 +87,8 @@ Explanation of the terms in the table:
 The `duration_based_chunks` algorithm aims to find optimal boundaries for the list of tests and every test group contains all tests between the start and end boundary.
 The `least_duration` algorithm walks the list of tests and assigns each test to the group with the smallest current duration.
 
+### Performance
+Both algorithms have been optimized for large test suites. The splitting computation is O(n) for `duration_based_chunks` and O(n log n) for `least_duration`, where n is the number of tests. The deselected test list is computed lazily (only for the group being run), reducing overhead from O(n × splits) to O(n).
 
 [**Demo with GitHub Actions**](https://github.com/jerry-git/pytest-split-gh-actions-demo)
 
