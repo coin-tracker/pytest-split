@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "pytest-split"
+name = "pytest-split-ct"
 version = "0.11.0"
 description = "Pytest plugin which splits the test suite to equally sized sub suites based on test execution time."
 authors = [
