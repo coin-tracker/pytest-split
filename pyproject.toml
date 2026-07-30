@@ -18,8 +18,6 @@ classifiers = [
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -33,8 +31,8 @@ packages = [{ include = 'pytest_split', from = 'src' }]
 
 
 [tool.poetry.dependencies]
-python = ">=3.8.1, <4.0"
-pytest = "^5 | ^6 | ^7 | ^8 | ^9" 
+python = ">=3.10, <4.0"
+pytest = "^5 | ^6 | ^7 | ^8 | ^9"
 
 
 [tool.poetry.dev-dependencies]
@@ -65,15 +63,20 @@ target-version = ["py37", "py38", "py39"]
 include = '\.pyi?$'
 
 [tool.pytest.ini_options]
-addopts = """\
-    --cov pytest_split \
-    --cov tests \
-    --cov-report term-missing \
-    --no-cov-on-fail \
-"""
+# NOTE: coverage is intentionally NOT collected via pytest-cov here. pytest
+# imports this project's plugin (the `pytest11` entry point) during startup,
+# before pytest-cov can begin measuring, so the plugin's own import-time lines
+# (imports, `def`/`class`/docstring statements) get reported as missing. That
+# artifact alone dropped total coverage below the gate. Coverage is instead
+# collected by starting it at interpreter startup with `coverage run -m pytest`
+# (see the CI `test` job), which measures those lines correctly.
+
+[tool.coverage.run]
+source = ["pytest_split", "tests"]
 
 [tool.coverage.report]
 fail_under = 90
+show_missing = true
 exclude_lines = [
     'if TYPE_CHECKING:',
     'pragma: no cover'
